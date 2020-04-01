@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+
 module FPGA(
     Data,PCLK,XCLK,PWDN,HREF,RST,VSYNC,SDA,SCL,//camera input
     CLK
@@ -22,7 +23,7 @@ module FPGA(
     wire cmos_frame_ce;
     wire cmos_frame_vsync;
     wire cmos_active_video;
-    wire cmos_frame_data;
+    wire [23:0] cmos_frame_data;
     
     ov5640_capture_data ov5640_capture_data(
         .rst_n(rst_cm),
@@ -39,12 +40,28 @@ module FPGA(
         .cmos_frame_data(cmos_frame_data)
     );
     
-    wire GSI_Data;
+    wire [7:0] GSI_Data;
     
     RGB2GSI RGB2GSI(
         .RGB_Data(cmos_frame_data),
+        .GSI_Data(GSI_Data)
+    );
+    
+    wire [23:0] RGB_Compensated;
+    wire ch;
+    
+    Light_comp Light_comp(
+        .RGB_Data_in(cmos_frame_data),
+        .RGB_Data_out(RGB_Compensated),
         .GSI_Data(GSI_Data),
-        .CLK(cmos_active_video)
+        .ch(ch)
+    );
+    
+    wire [23:0] YCgCr_Data;
+    
+    RGB2YCgCr RGB2YCgCr(
+        .RGB_Data(RGB_Compensated),
+        .YCgCr_Data(YCgCr_Data)
     );
     
 endmodule
