@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
-module comp_cal(EN,GSI_Data,coe,ch);
+module comp_cal(EN,EOF,GSI_Data,coe,ch);
 
-    input EN;
+    input EN,EOF;
     input [7:0] GSI_Data;
     output reg [31:0] coe;
     output reg ch;
@@ -12,7 +12,6 @@ module comp_cal(EN,GSI_Data,coe,ch);
     parameter threshold2=235;
     parameter threshold3=225;
     
-    reg [18:0] count;
     reg [7:0] c1,c2,c3;
     reg [31:0] coe_t;
     
@@ -21,16 +20,14 @@ module comp_cal(EN,GSI_Data,coe,ch);
         c1=0;
         c2=0;
         c3=0;
-        count=0;
     end
     
     always @(*)
     begin
         if(EN)
         begin
-            if (count==size)
+            if (EOF)
             begin
-                count<=0;
                 ch<=1;
                 c1<=0;
                 c2<=0;
@@ -38,7 +35,6 @@ module comp_cal(EN,GSI_Data,coe,ch);
             end
             else
             begin
-                count<=count+1;
                 ch<=0;
             end
         end
@@ -59,7 +55,7 @@ module comp_cal(EN,GSI_Data,coe,ch);
     
     always @(*)
     begin
-        if (count==size)
+        if (EOF)
         begin
             coe_t=(c1*250+c2*240+c3*230)*65535;
             coe=coe_t/(c1+c2+c3);

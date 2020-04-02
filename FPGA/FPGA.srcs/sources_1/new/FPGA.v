@@ -40,6 +40,18 @@ module FPGA(
         .cmos_frame_data(cmos_frame_data)
     );
     
+    wire [9:0] line_counter;
+    wire [8:0] row_counter;
+    wire EOF;
+    
+    frame_counter frame_counter(
+        .CLK(cmos_active_video),
+        .rst(),
+        .line_counter(line_counter),
+        .row_counter(row_counter),
+        .EOF(EOF)
+    );
+    
     wire [7:0] GSI_Data;
     
     RGB2GSI RGB2GSI(
@@ -54,7 +66,8 @@ module FPGA(
         .RGB_Data_in(cmos_frame_data),
         .RGB_Data_out(RGB_Compensated),
         .GSI_Data(GSI_Data),
-        .ch(ch)
+        .ch(ch),
+        .EOF(EOF)
     );
     
     wire [23:0] YCgCr_Data;
@@ -62,6 +75,31 @@ module FPGA(
     RGB2YCgCr RGB2YCgCr(
         .RGB_Data(RGB_Compensated),
         .YCgCr_Data(YCgCr_Data)
+    );
+    
+    wire result;
+    
+    Gauss_Comparator Gauss_Comparator(
+        .YCgCr_Data(YCgCr_Data),
+        .result(result)
+    );
+    
+    wire opened,closed;
+    
+    Opening Opening(
+        .line_counter(line_counter),
+        .row_counter(row_counter),
+        .result(result),
+        .CLK(cmos_active_video),
+        .out(opened)
+    );
+    
+    Closing Closing(
+        .line_counter(line_counter),
+        .row_counter(row_counter),
+        .opened(opened),
+        .CLK(cmos_active_video),
+        .out(closed)
     );
     
 endmodule
