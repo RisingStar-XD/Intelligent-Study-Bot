@@ -15,14 +15,17 @@ module RGB2YCgCr(RGB_Data,YCgCr_Data);
     YCgCr_Data=0;
     end
     
-    always @(*)
+    always @(RGB_Data)
     begin
         Y=RGB_Data[7:0]*16777+RGB_Data[15:8]*33030+RGB_Data[23:16]*6357;
-        YCgCr_Data[7:0]=Y[23:16]+16;
         G=RGB_Data[15:8]*28770-RGB_Data[7:0]*20840-RGB_Data[23:16]*7930;
-        YCgCr_Data[15:8]=128+G[23:16];
         R=RGB_Data[7:0]*28770-RGB_Data[15:8]*24052-RGB_Data[23:16]*4653;
-        YCgCr_Data[23:16]=128+R[23:16];
     end
     
+    always @(R)
+    begin
+        YCgCr_Data[7:0]=Y[23:16]+16;
+        YCgCr_Data[15:8]=128+G[23:16];
+        YCgCr_Data[23:16]=128+R[23:16];
+    end
 endmodule

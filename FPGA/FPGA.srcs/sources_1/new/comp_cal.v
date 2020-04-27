@@ -13,7 +13,6 @@ module comp_cal(EN,EOF,GSI_Data,coe,ch);
     parameter threshold3=225;
     
     reg [7:0] c1,c2,c3;
-    reg [31:0] coe_t;
     
     initial
     begin
@@ -40,7 +39,7 @@ module comp_cal(EN,EOF,GSI_Data,coe,ch);
         end
     end
     
-    always @(*)
+    always @(GSI_Data)
     begin
         if(EN)
         begin
@@ -53,12 +52,11 @@ module comp_cal(EN,EOF,GSI_Data,coe,ch);
         end
     end
     
-    always @(*)
+    always @(GSI_Data)
     begin
         if (EOF)
         begin
-            coe_t=(c1*250+c2*240+c3*230)*65535;
-            coe=coe_t/(c1+c2+c3);
+            coe<=(c1*250+c2*240+c3*230)*65535/(c1+c2+c3);
         end
     end
     

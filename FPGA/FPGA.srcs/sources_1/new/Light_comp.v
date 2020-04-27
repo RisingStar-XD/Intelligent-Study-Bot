@@ -47,14 +47,17 @@ module Light_comp(RGB_Data_in,RGB_Data_out,GSI_Data,ch,EOF);
         end
     end
     
-    always @(*)
+    always @(RGB_Data_in)
     begin
         R=RGB_Data_in[7:0]*coe;
         G=RGB_Data_in[15:8]*coe;
         B=RGB_Data_in[23:16]*coe;
-        RGB_Data_out[7:0]=R[31:24];
-        RGB_Data_out[15:8]=G[31:24];
-        RGB_Data_out[23:16]=B[31:24];
     end
     
+    always @(B)
+    begin
+        RGB_Data_out[7:0]<=R[31:24];
+        RGB_Data_out[15:8]<=G[31:24];
+        RGB_Data_out[23:16]<=B[31:24];
+    end
 endmodule
