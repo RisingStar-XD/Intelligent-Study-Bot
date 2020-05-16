@@ -60,7 +60,10 @@ module FPGA(
     wire [8:0] row_counter_2;
     wire [9:0] line_counter_3;
     wire [8:0] row_counter_3;
-    wire EOF_1;
+    wire [9:0] line_counter_4;
+    wire [8:0] row_counter_4;
+    wire [18:0] pixel_counter_4;
+    wire EOF_1,EOF_4,EOL_4;
     
     Counter_Shift Counter_Shift(
         .EOF_in(EOF),
@@ -70,7 +73,13 @@ module FPGA(
         .line_counter_2(line_counter_2),
         .row_counter_2(row_counter_2),
         .line_counter_3(line_counter_3),
-        .row_counter_3(row_counter_3)
+        .row_counter_3(row_counter_3),
+        .line_counter_4(line_counter_4),
+        .row_counter_4(row_counter_4),
+        .pixel_counter_4(pixel_counter_4),
+        .clk(cmos_active_video),
+        .EOL_4(EOL_4),
+        .EOF_4(EOF_4)
     );
     
     wire [7:0] GSI_Data;
@@ -134,25 +143,69 @@ module FPGA(
         .out(closed)
     );
     
-    reg ena,wea,enb;
-    reg [18:0] addra,addrb;
+    reg wea;
+    wire [1:0] image_data;
+    wire [1:0] wren;
+    wire [18:0] Pixel_addr_1;
+    wire [18:0] Pixel_addr_2;
     
-    wire b_read_clock;
-    wire Binary_image_data;
-    
-    Binary_Image_buffer Binary_Image(
-        .clka(cmos_active_video),
-        .ena(ena),
-        .wea(wea),
-        .addra(addra),
-        .dina(closed),
-        .clkb(b_read_clock),
-        .enb(enb),
-        .addrb(addrb),
-        .doutb(Binary_image_data)
+    image_distributor image_distributor(
+        .EOF(EOF_4),
+        .clk(cmos_active_video),
+        .image_data(closed),
+        .wren(wea),
+        .addr(pixel_counter_4),
+        .image_data_1(image_data[0]),
+        .wren_1(wren[0]),
+        .addr_1(),
+        .image_data_2(image_data[1]),
+        .wren_2(wren[1]),
+        .addr_2()
     );
     
+    Binary_Image_buffer Binary_Image_1(
+        .clka(cmos_active_video),
+        .ena(),
+        .wea(wren[0]),
+        .addra(Pixel_addr_1),
+        .dina(image_data[0]),
+        .clkb(),
+        .enb(),
+        .addrb(),
+        .doutb()
+    );
     
+    Binary_Image_buffer Binary_Image_2(
+        .clka(cmos_active_video),
+        .ena(),
+        .wea(wren[1]),
+        .addra(Pixel_addr_2),
+        .dina(image_data[1]),
+        .clkb(),
+        .enb(),
+        .addrb(),
+        .doutb()
+    );
+    
+    wire valid;
+    
+    row_checker row_checker(
+        .result(closed),
+        .EOL(EOL_4),
+        .clk(cmos_active_video),
+        .valid(valid)
+    );
+    
+    wire [9:0] horizontal_start,horizontal_end;
+    
+    face face_horizontal(
+        .valid(valid),
+        .clk(EOL_4),
+        .counter(line_counter_4),
+        .s(horizontal_start),
+        .e(horizontal_end),
+        .EOF(EOF_4)
+    );
     
     uart_recv(
         .sys_clk(),
