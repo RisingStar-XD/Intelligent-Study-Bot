@@ -17,7 +17,7 @@ module RGB2GSI_Buff(RGB_Data_in,RGB_Data_out,GSI_Data_in,GSI_Data_out,Clk);
     
     always @(posedge Clk)
     begin
-        RGB_Data_out=RGB_Data_in;
-        GSI_Data_out=GSI_Data_in;
+        RGB_Data_out<=RGB_Data_in;
+        GSI_Data_out<=GSI_Data_in;
     end
 endmodule
