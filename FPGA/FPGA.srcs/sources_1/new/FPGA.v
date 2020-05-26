@@ -23,6 +23,18 @@ module FPGA(
     //Registers working with ov5640 decoding module
     reg rst_cm;
     
+    wire counter_rst;
+    wire counter_EN;
+    wire shifter_rst;
+    wire shifter_EN;
+    
+    Control Control(
+        .counter_rst(counter_rst),
+        .counter_EN(counter_EN),
+        .shifter_rst(shifter_rst),
+        .shifter_EN(shifter_EN)
+    );
+    
     wire cmos_frame_clk;
     wire cmos_frame_ce;
     wire cmos_frame_vsync;
@@ -46,14 +58,18 @@ module FPGA(
     
     wire [9:0] line_counter;
     wire [8:0] row_counter;
-    wire EOF;
+    wire [18:0] pixel_counter;
+    wire EOF,EOL;
     
     frame_counter frame_counter(
         .CLK(cmos_active_video),
-        .rst(),
+        .rst(counter_rst),
+        .EN(counter_EN),
         .line_counter(line_counter),
         .row_counter(row_counter),
-        .EOF(EOF)
+        .pixel_counter(pixel_counter),
+        .EOF(EOF),
+        .EOL(EOL)
     );
     
     wire [9:0] line_counter_2;
@@ -66,9 +82,13 @@ module FPGA(
     wire EOF_1,EOF_4,EOL_4;
     
     Counter_Shift Counter_Shift(
+        .rst(shifter_rst),
+        .EN(shifter_EN),
         .EOF_in(EOF),
+        .EOL_in(EOL),
         .line_counter_in(line_counter),
         .row_counter_in(row_counter),
+        .pixel_counter_in(pixel_counter),
         .EOF_1(EOF_1),
         .line_counter_2(line_counter_2),
         .row_counter_2(row_counter_2),
