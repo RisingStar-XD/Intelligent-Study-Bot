@@ -121,13 +121,11 @@ module FPGA(
     );
     
     wire [23:0] RGB_Compensated;
-    wire ch;
     
     Light_comp Light_comp(
         .RGB_Data_in(cmos_frame_buffed),
         .RGB_Data_out(RGB_Compensated),
         .GSI_Data(GSI_Buffed),
-        .ch(ch),
         .EOF(EOF_1)
     );
     
@@ -168,20 +166,26 @@ module FPGA(
     wire [1:0] wren;
     wire [18:0] Pixel_addr_1;
     wire [18:0] Pixel_addr_2;
+    wire d_count;
     
     image_distributor image_distributor(
         .EOF(EOF_4),
+        .count(d_count),
         .clk(cmos_active_video),
         .image_data(closed),
         .wren(wea),
         .addr(pixel_counter_4),
         .image_data_1(image_data[0]),
         .wren_1(wren[0]),
-        .addr_1(),
+        .addr_1(Pixel_addr_1),
         .image_data_2(image_data[1]),
         .wren_2(wren[1]),
-        .addr_2()
+        .addr_2(Pixel_addr_2)
     );
+    
+    wire image1,image2;
+    wire en1,en2;
+    wire [18:0] check_addr;
     
     Binary_Image_buffer Binary_Image_1(
         .clka(cmos_active_video),
@@ -190,9 +194,9 @@ module FPGA(
         .addra(Pixel_addr_1),
         .dina(image_data[0]),
         .clkb(),
-        .enb(),
-        .addrb(),
-        .doutb()
+        .enb(en1),
+        .addrb(check_addr),
+        .doutb(image1)
     );
     
     Binary_Image_buffer Binary_Image_2(
@@ -202,9 +206,9 @@ module FPGA(
         .addra(Pixel_addr_2),
         .dina(image_data[1]),
         .clkb(),
-        .enb(),
-        .addrb(),
-        .doutb()
+        .enb(en2),
+        .addrb(check_addr),
+        .doutb(image2)
     );
     
     wire valid;
@@ -221,10 +225,45 @@ module FPGA(
     face face_horizontal(
         .valid(valid),
         .clk(EOL_4),
-        .counter(line_counter_4),
+        .counter({1'b0,row_counter_4}),
         .s(horizontal_start),
         .e(horizontal_end),
         .EOF(EOF_4)
+    );
+    
+    wire line_valid;
+    wire line_ready;
+    wire EEOF;
+    wire im;
+    wire [9:0] check_counter;
+    
+    line_checker line_checker(
+        .clk(),
+        .image(im),
+        .en(EOF_4),
+        .valid(line_valid),
+        .ready(line_ready),
+        .line_counter(check_counter),
+        .addr(check_addr),
+        .EEOF(EEOF)
+    );
+    
+    CA CA(
+        .count(d_count),
+        .image1(image1),
+        .image2(image2),
+        .image(im),
+        .en1(en1),
+        .en2(en2)
+    );
+    
+    face face_vertical(
+        .valid(line_valid),
+        .clk(line_ready),
+        .counter(check_counter),
+        .s(vertical_start),
+        .e(vertical_end),
+        .EOF(EEOF)
     );
     
     uart_recv(

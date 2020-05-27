@@ -1,13 +1,12 @@
 `timescale 1ns / 1ps
 
-module Light_comp(RGB_Data_in,RGB_Data_out,GSI_Data,ch,EOF);
+module Light_comp(RGB_Data_in,RGB_Data_out,GSI_Data,EOF);
     
     input [23:0] RGB_Data_in;
     input [7:0]GSI_Data;
     input EOF;
     
     output [23:0] RGB_Data_out;
-    output ch;
     
     parameter frames=900;//update the reference white parameter every 900 frames
     parameter size=307200;
@@ -21,8 +20,7 @@ module Light_comp(RGB_Data_in,RGB_Data_out,GSI_Data,ch,EOF);
         .EN(EN),
         .EOF(EOF),
         .GSI_Data(GSI_Data),
-        .coe(coe),
-        .ch(ch)
+        .coe(coe)
     );
     
     initial

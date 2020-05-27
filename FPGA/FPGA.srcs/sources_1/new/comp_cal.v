@@ -1,11 +1,10 @@
 `timescale 1ns / 1ps
 
-module comp_cal(EN,EOF,GSI_Data,coe,ch);
+module comp_cal(EN,EOF,GSI_Data,coe);
 
     input EN,EOF;
     input [7:0] GSI_Data;
     output reg [31:0] coe;
-    output reg ch;
     
     parameter size=307200;
     parameter threshold1=245;
@@ -27,14 +26,9 @@ module comp_cal(EN,EOF,GSI_Data,coe,ch);
         begin
             if (EOF)
             begin
-                ch<=1;
                 c1<=0;
                 c2<=0;
                 c3<=0;
-            end
-            else
-            begin
-                ch<=0;
             end
         end
     end

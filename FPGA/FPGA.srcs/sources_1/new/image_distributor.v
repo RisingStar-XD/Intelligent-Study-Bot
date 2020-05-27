@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module image_distributor(
-    EOF,clk,
+    EOF,clk,count,
     image_data,wren,addr,
     image_data_1,wren_1,addr_1,
     image_data_2,wren_2,addr_2);
@@ -20,8 +20,7 @@ module image_distributor(
     output reg image_data_2;
     output reg wren_2;
     output reg [18:0] addr_2;
-    
-    reg [1:0] count;
+    output reg count;
     
     initial
     begin
@@ -33,17 +32,14 @@ module image_distributor(
     always @(posedge clk)
     begin
         if(EOF)
-            if(count==2)
-                count<=0;
-            else
-                count<=count+1;
+            count<=!count;
     end
     
     always @(clk)
     begin
         case(count)
-        2'b00:{image_data_1,wren_1,addr_1}<={image_data,wren,addr};
-        2'b01:{image_data_2,wren_2,addr_2}<={image_data,wren,addr};
+        1'b0:{image_data_1,wren_1,addr_1}<={image_data,wren,addr};
+        1'b1:{image_data_2,wren_2,addr_2}<={image_data,wren,addr};
         endcase
     end
     
