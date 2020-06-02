@@ -144,21 +144,30 @@ module FPGA(
     );
     
     wire opened,closed;
+    wire [9:0] line_O;
+    wire [8:0] row_O;
     
     Opening Opening(
         .line_counter(line_counter_2),
         .row_counter(row_counter_2),
         .result(result),
         .CLK(cmos_active_video),
-        .out(opened)
+        .out(opened),
+        .line_counter_o(line_O),
+        .row_counter_o(row_O)
     );
     
+    wire [9:0] line_C;
+    wire [8:0] row_C;
+    
     Closing Closing(
-        .line_counter(line_counter_3),
-        .row_counter(row_counter_3),
+        .line_counter(line_O),
+        .row_counter(row_O),
         .opened(opened),
         .CLK(cmos_active_video),
-        .out(closed)
+        .out(closed),
+        .line_counter_o(line_C),
+        .row_counter_o(row_C)
     );
     
     reg wea;

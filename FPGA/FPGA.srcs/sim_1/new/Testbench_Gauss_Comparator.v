@@ -21,18 +21,33 @@
 
 
 module Testbench_Gauss_Comparator();
-    reg [23:0]  YCgCr_DATA;
+
+    reg [23:0] YCgCr_Data;
+    reg CLK;
+    reg EOF;
     
-    wire    RESULT;
-
-    Gauss_Comparator Gauss_Comparator(
-        .YCgCr_Data(YCgCr_DATA),
-        .result(RESULT)
+    wire result;
+    
+     Gauss_Comparator Gauss_Comparator(
+        .EOF(EOF),
+        .CLK(CLK),
+        .YCgCr_Data(YCgCr_Data),
+        .result(result)
     );
-
+    
+    
+    
     initial
     begin
-        YCgCr_DATA = 0;
+    YCgCr_Data = 24'b101010010100101010011001;
+    CLK = 0;
+        forever
+        begin
+        #5 CLK = ~CLK;
+        YCgCr_Data = YCgCr_Data +1;    
+        end
     end
-
+    
+    
+    
 endmodule

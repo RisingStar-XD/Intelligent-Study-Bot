@@ -39,6 +39,10 @@ module Testbench_row_checker();
         EOL_4 = 0;
         CMOS_ACTIVE_VIDEO = 0;
         CLOSE_OUT = 0;
+        #10 CLOSE_OUT = 1;
+        forever #10 CMOS_ACTIVE_VIDEO = ~CMOS_ACTIVE_VIDEO;
+        #10000 EOL_4 = 1;
+       
     end
     
 endmodule

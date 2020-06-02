@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 2020/05/23 10:23:35
+// Create Date: 2020/05/29 11:46:46
 // Design Name: 
-// Module Name: Testbench_RGB2YCgCr
+// Module Name: Testbench_Dilating
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,20 +20,22 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Testbench_RGB2YCgCr();
-    
-    reg [23:0]  RGB_DATA_OUT_C;
-    
-    wire    [23:0]  YCgCr_DATA;
+module Testbench_Dilating();
 
-    RGB2YCgCr RGB2YCgCr(
-        .RGB_Data(RGB_DATA_OUT_C),
-        .YCgCr_Data(YCgCr_DATA)
-    );    
+    reg [8:0]   Window;
+    
+    wire        out;
+    
+    Dilating Dilating(
+        .Window(Window),
+        .out(out)    
+    );
     
     initial
     begin
-        RGB_DATA_OUT_C = 24'b100110101010011011101001;
-        forever #10 RGB_DATA_OUT_C = RGB_DATA_OUT_C +1;
+    Window = 9'b100100101;
+    #10 Window = 9'b101010010;
+    #10 Window = Window+1;
     end
+
 endmodule
